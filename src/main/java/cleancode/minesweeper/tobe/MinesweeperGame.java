@@ -120,6 +120,11 @@ public class MinesweeperGame {
     }
 
     private static void checkIfGameIsOver() {
+        //셀이 전부 열림 vs 사용자가 확인 다름
+        //어떤 셀이 열려있거나 닫혀있지만 깃발로 확인했어 >> 사용자가 확인했다라는 두 케이스
+        //메서드 이름이 부적절!!
+        //기존은 String 기반의 이중배열이라서 가능했음
+        //Closed만 아니면 ok(열려있거나 깃발이 있음)
         boolean isAllOpened = isAllCellOpened();
         if (isAllOpened) {
             changeGameStatusToWin();
