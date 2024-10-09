@@ -42,6 +42,10 @@ public class OutputHandler {
         System.out.println("1. 예 | 2. 아니오");
     }
 
+    public void showPassOrderSummary(StudyCafePass selectedPass){
+        showPassOrderSummary(selectedPass, null);
+    }
+
     public void showPassOrderSummary(StudyCafePass selectedPass, StudyCafeLockerPass lockerPass) {
         System.out.println();
         System.out.println("이용 내역");
@@ -60,6 +64,8 @@ public class OutputHandler {
         System.out.println("총 결제 금액: " + totalPrice + "원");
         System.out.println();
     }
+
+
 
     public void showSimpleMessage(String message) {
         System.out.println(message);
