@@ -20,41 +20,47 @@ public class StudyCafePassMachine {
         try {
             showGuideMessage();
             StudyCafePassType studyCafePassType = getStudyCafePassType();
-            List<StudyCafePass> hourlyPasses = findPassesFrom(studyCafePassType);
-            showPasses(hourlyPasses);
-            StudyCafePass selectedPass = getSelectPass(hourlyPasses);
+
+            List<StudyCafePass> passes = findPassesFrom(studyCafePassType);
+            showPasses(passes);
+
+            StudyCafePass selectedPass = getSelectPass(passes);
             showPassOrderSummary(selectedPass);
 
-            if (studyCafePassType == StudyCafePassType.FIXED) {
-                //여기서부터는 고정석만의 로직
-                List<StudyCafeLockerPass> lockerPasses = studyCafeFileHandler.readLockerPasses();
-                StudyCafeLockerPass lockerPass = lockerPasses.stream()
-                    .filter(option ->
-                        option.getPassType() == selectedPass.getPassType()
-                            && option.getDuration() == selectedPass.getDuration()
-                    )
-                    .findFirst()
-                    .orElse(null);
+            StudyCafeLockerPass lockerPass = selectLockerPass(selectedPass);
 
-                boolean lockerSelection = false;
-                if (lockerPass != null) {
-                    outputHandler.askLockerPass(lockerPass);
-                    lockerSelection = inputHandler.getLockerSelection();
-                }
+            outputHandler.showPassOrderSummary(selectedPass, lockerPass);
 
-                if (lockerSelection) {
-                    outputHandler.showPassOrderSummary(selectedPass, lockerPass);
-                } else {
-                    outputHandler.showPassOrderSummary(selectedPass, null);
-                }
-            }else{
-                showPassOrderSummary(selectedPass);
-            }
         } catch (AppException e) {
             outputHandler.showSimpleMessage(e.getMessage());
         } catch (Exception e) {
             outputHandler.showSimpleMessage("알 수 없는 오류가 발생했습니다.");
         }
+    }
+
+    private StudyCafeLockerPass selectLockerPass(StudyCafePass selectedPass) {
+        if(selectedPass.getPassType() != StudyCafePassType.FIXED){
+            return null;
+        }
+
+        List<StudyCafeLockerPass> lockerPasses = studyCafeFileHandler.readLockerPasses();
+        StudyCafeLockerPass lockerPassCandidate = lockerPasses.stream()
+                .filter(option ->
+                        option.getPassType() == selectedPass.getPassType()
+                                && option.getDuration() == selectedPass.getDuration()
+                )
+                .findFirst()
+                .orElse(null);
+
+        if (lockerPassCandidate != null) {
+            outputHandler.askLockerPass(lockerPassCandidate);
+            boolean isLockerSelected = inputHandler.getLockerSelection();
+
+            if(isLockerSelected){
+                return lockerPassCandidate;
+            }
+        }
+        return null;
     }
 
     private void showPassOrderSummary(StudyCafePass selectedPass) {
